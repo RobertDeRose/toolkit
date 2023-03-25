@@ -68,7 +68,8 @@ export async function restoreCache(
   primaryKey: string,
   restoreKeys?: string[],
   options?: DownloadOptions,
-  enableCrossOsArchive = false
+  enableCrossOsArchive = false,
+  useSudo = false
 ): Promise<string | undefined> {
   checkPaths(paths)
 
@@ -129,7 +130,7 @@ export async function restoreCache(
       )} MB (${archiveFileSize} B)`
     )
 
-    await extractTar(archivePath, compressionMethod)
+    await extractTar(archivePath, compressionMethod, useSudo)
     core.info('Cache restored successfully')
 
     return cacheEntry.cacheKey
@@ -166,7 +167,8 @@ export async function saveCache(
   paths: string[],
   key: string,
   options?: UploadOptions,
-  enableCrossOsArchive = false
+  enableCrossOsArchive = false,
+  useSudo = false
 ): Promise<number> {
   checkPaths(paths)
   checkKey(key)
@@ -193,7 +195,7 @@ export async function saveCache(
   core.debug(`Archive Path: ${archivePath}`)
 
   try {
-    await createTar(archiveFolder, cachePaths, compressionMethod)
+    await createTar(archiveFolder, cachePaths, compressionMethod, useSudo)
     if (core.isDebug()) {
       await listTar(archivePath, compressionMethod)
     }

@@ -272,12 +272,16 @@ export async function listTar(
 // Extract a tar
 export async function extractTar(
   archivePath: string,
-  compressionMethod: CompressionMethod
+  compressionMethod: CompressionMethod,
+  useSudo = false
 ): Promise<void> {
   // Create directory to extract tar into
   const workingDirectory = getWorkingDirectory()
   await io.mkdirP(workingDirectory)
-  const commands = await getCommands(compressionMethod, 'extract', archivePath)
+  let commands = await getCommands(compressionMethod, 'extract', archivePath)
+  if (useSudo) {
+    commands = commands.map( (x) => `sudo ${x}`);
+  }
   await execCommands(commands)
 }
 
@@ -285,13 +289,18 @@ export async function extractTar(
 export async function createTar(
   archiveFolder: string,
   sourceDirectories: string[],
-  compressionMethod: CompressionMethod
+  compressionMethod: CompressionMethod,
+  useSudo = false
 ): Promise<void> {
   // Write source directories to manifest.txt to avoid command length limits
   writeFileSync(
     path.join(archiveFolder, ManifestFilename),
     sourceDirectories.join('\n')
   )
-  const commands = await getCommands(compressionMethod, 'create')
+  let commands = await getCommands(compressionMethod, 'create')
+
+  if (useSudo) {
+    commands = commands.map( (x) => `sudo ${x}`);
+  }
   await execCommands(commands, archiveFolder)
 }
